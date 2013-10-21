@@ -1,0 +1,59 @@
+---------------------------------------------------------------------
+-- lancement de la commande sous SQLPLUS
+-- User       : system
+-- password   : oracle
+-- connection : gmdb
+-- fichier    : E:\GGM\perso\LOG4PL~1\LOG4PL~1\src\contribs\GUILLA~1\sql\workload.sql
+---------------------------------------------------------------------
+
+SQL*Plus: Release 9.2.0.1.0 - Production on Je Jul 11 12:27:18 2002
+
+Copyright (c) 1982, 2002, Oracle Corporation.  All rights reserved.
+
+
+Connecté à :
+Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production
+
+Connecté.
+
+Procédure PL/SQL terminée avec succès.
+
+
+Procédure créée.
+
+
+Procédure créée.
+
+  1  Create or replace procedure testWorkload1
+  2  is
+  3	 lCtx PLOG.LOG_CTX := PLOG.init ('perfTestWithoutlog', PLOG.LINFO);
+  4  begin
+  5	 plog.info(lCtx, 'Begin');
+  6	 commit;
+  7	 for i in 1..1000000 loop
+  8	     plog.DEBUG (lCtx, 'neverInsertInTable');
+  9	 end loop;
+ 10	 plog.info(lCtx, 'End');
+ 11	 commit;
+ 12* end;
+
+Procédure PL/SQL terminée avec succès.
+
+  1  begin
+  2	testWorkload1;
+  3* end;
+
+LOG
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+[11/07 12:28:26: 38][OFF    ][TESTLOG][plog.purge][Purge By TESTLOG]
+[11/07 12:28:26: 85][INFO   ][TESTLOG][perfTestWithoutlog][Begin]
+[11/07 12:33:30: 74][INFO   ][TESTLOG][perfTestWithoutlog][End]
+
+Déconnecté de Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production
+---------------------------------------------------------------------
+-- Fin
+---------------------------------------------------------------------

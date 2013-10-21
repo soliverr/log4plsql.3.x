@@ -1,0 +1,80 @@
+---------------------------------------------------------------------
+-- lancement de la commande sous SQLPLUS
+-- User       : system
+-- password   : oracle
+-- connection : gmdb
+-- fichier    : E:\GGM\perso\LOG4PL~1\LOG4PL~1\src\contribs\GUILLA~1\sql\workload.sql
+---------------------------------------------------------------------
+
+SQL*Plus: Release 9.2.0.1.0 - Production on Je Jul 11 12:51:27 2002
+
+Copyright (c) 1982, 2002, Oracle Corporation.  All rights reserved.
+
+
+Connecté à :
+Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production
+
+Connecté.
+
+Procédure PL/SQL terminée avec succès.
+
+
+Procédure créée.
+
+
+Procédure créée.
+
+  1  Create or replace procedure testWorkload2
+  2  is
+  3	 lCtx PLOG.LOG_CTX := PLOG.init ('perfTestWithlog', PLOG.LINFO);
+  4  begin
+  5	 plog.info(lCtx, 'Begin');
+  6	 for i in 1..100 loop
+  7	     for i in 1..10000 loop
+  8		 plog.WARN (lCtx, 'InsertInTable');
+  9	     end loop
+ 10	     commit;
+ 11	 end loop;
+ 12	 plog.info(lCtx, 'End');
+ 13	 commit;
+ 14* end;
+
+
+Procédure PL/SQL terminée avec succès.
+
+  1  begin
+  2	testWorkload2;
+  3* end;
+
+nbr line insert by log
+----------------------
+	       1000000
+
+
+TO_CHAR(LDATE,'HH24:MI:SS')||LTEXTE
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+12:51:30  Begin
+13:14:08  End
+
+
+
+select min(nbr), max(nbr), avg(nbr)
+from (select d, count(*) nbr 
+      from (select to_char(LDATE,'HH24MISS') d
+            from ulog.tlog where LLEVEL = 4 ) 
+            group by d)
+
+
+  MIN(NBR)   MAX(NBR)	AVG(NBR)
+---------- ---------- ----------
+	 2	  856 753,579503
+
+
+Déconnecté de Oracle9i Enterprise Edition Release 9.2.0.1.0 - Production
+With the OLAP and Oracle Data Mining options
+JServer Release 9.2.0.1.0 - Production
+---------------------------------------------------------------------
+-- Fin
+---------------------------------------------------------------------
