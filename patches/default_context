@@ -1,0 +1,12 @@
+Bottom: 8a2a9902bdd145e314b3a3cb7749a01d57ecc941
+Top:    8a2a9902bdd145e314b3a3cb7749a01d57ecc941
+Author: sOliverr <soliverr@gmail.com>
+Date:   2013-10-24 10:29:49 +0600
+
+Set global dCTX variable as default PLOG context.
+It allows use PLOG procedures without pCTX parameter.
+
+
+---
+
+
