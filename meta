@@ -1,9 +1,8 @@
 Version: 1
-Previous: dc501b873c1424d0d1ade18a841f460e1feade3d
-Head: 6d35c86fc8431242c327a18a9eb62986ec68c1a0
+Previous: f9062c56c9aca64a2849901a1722f65644878006
+Head: 3c826e1dbba55e8be137d93fd5b174d9f71a7384
 Applied:
   default_context: 00f88323d9190995fa5689db31835fa11f5b688c
-  additional_columns: c190984b08c87338163e0e672bee4b686c6c2278
-  refresh-temp: 6d35c86fc8431242c327a18a9eb62986ec68c1a0
+  additional_columns: 3c826e1dbba55e8be137d93fd5b174d9f71a7384
 Unapplied:
 Hidden:
