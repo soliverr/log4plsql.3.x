@@ -1,0 +1,188 @@
+Bottom: bd287fece5272f369d1e75820c32b0ef66a69c75
+Top:    56f239f20e8f0c5afeb6c468d35bf4101cab393c
+Author: sOliverr <soliverr@gmail.com>
+Date:   2013-10-24 10:52:39 +0600
+
+Refresh of additional_columns
+
+---
+
+diff --git a/sql/grantsys.sql b/sql/grantsys.sql
+index 4435ece..8d969a3 100644
+--- a/sql/grantsys.sql
++++ b/sql/grantsys.sql
+@@ -48,7 +48,13 @@ GRANT DROP PUBLIC SYNONYM TO &&1
+ GRANT EXECUTE ON SYS.DBMS_SYSTEM TO &&1;
+ /
+ 
+-EXIT 
++GRANT SELECT ON SYS.V_$DATABASE to &&1;
++/
++
++GRANT SELECT ON SYS.V_$MYSTAT to &&1;
++/
++
++--EXIT 
+ 
+ 
+ 
+diff --git a/sql/pblog.sql b/sql/pblog.sql
+index 55f4030..1670054 100644
+--- a/sql/pblog.sql
++++ b/sql/pblog.sql
+@@ -144,6 +144,7 @@ END;
+ procedure addRow
+ (
+   pID         in TLOG.id%type,
++  pSID        in TLOG.lsid%type,
+   pLDate      in TLOG.ldate%type,
+   pLHSECS     in TLOG.lhsecs%type, 
+   pLLEVEL     in TLOG.llevel%type,
+@@ -152,21 +153,30 @@ procedure addRow
+   pLTEXTE     in TLOG.ltexte%type
+ )
+ is
++    pMNAME varchar2(2000);
++    pANAME varchar2(2000);
+ begin
++	DBMS_APPLICATION_INFO.READ_MODULE ( pMNAME, pANAME );
+         insert into TLOG
+             (
+              ID         ,
++	         LSID       ,
+              LDate      ,
+              LHSECS     , 
+              LLEVEL     ,
++	         LMODULE    ,
++	         LACTION    ,
+              LSECTION   ,
+              LUSER      ,
+              LTEXTE     
+              ) VALUES (
+              pID,
++	         pSID,
+              pLDate,
+              pLHSECS,
+              pLLEVEL,
++	         pMNAME,
++	         pANAME,
+              pLSECTION,
+              pLUSER,
+              pLTEXTE
+@@ -177,6 +187,7 @@ end;
+ procedure addRowAutonomous
+ (
+   pID         in TLOG.id%type,
++  pSID        in TLOG.lsid%type,
+   pLDate      in TLOG.ldate%type,
+   pLHSECS     in TLOG.lhsecs%type, 
+   pLLEVEL     in TLOG.llevel%type,
+@@ -190,6 +201,7 @@ begin
+  addRow
+   (
+    pID         => pID,
++   pSID        => pSID,
+    pLDate      => pLDate,
+    pLHSECS     => pLHSECS, 
+    pLLEVEL     => pLLEVEL,
+@@ -249,6 +261,7 @@ BEGIN
+                  addRow
+                   (
+                    pID         => pID,
++		           pSID        => pCTX.LSID,
+                    pLDate      => pLDate,
+                    pLHSECS     => pLHSECS, 
+                    pLLEVEL     => pLLEVEL,
+@@ -260,6 +273,7 @@ BEGIN
+                  addRowAutonomous
+                   (
+                    pID         => pID,
++		           pSID        => pCTX.LSID,
+                    pLDate      => pLDate,
+                    pLHSECS     => pLHSECS, 
+                    pLLEVEL     => pLLEVEL,
+@@ -272,6 +286,7 @@ BEGIN
+ 
+     IF pCTX.USE_LOG4J = TRUE then
+         DBMS_PIPE.pack_message(pID);                    -- SEQUENTIAL ID
++	    DBMS_PIPE.pack_message(pCTX.LSID);              -- SESSION ID
+         DBMS_PIPE.pack_message(pLDATE);                 -- TIMESTAMP OF LOG STATEMENT
+ 		DBMS_PIPE.pack_message(MOD(pLHSECS,100));       -- HUNDREDTHS OF SECONDS FOR TIMESTAMP
+         DBMS_PIPE.pack_message(pLLEVEL);                -- LOG LEVEL
+@@ -290,7 +305,7 @@ BEGIN
+     END IF;
+              
+     IF pCTX.USE_ALERT = TRUE then        
+-        sys.dbms_system.ksdwrt(2,'PLOG:'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||' user: '||PLUSER||' level: '||getLevelInText(pLLEVEL)||' logid: '||pID ||' '||pLSECTION); 
++        sys.dbms_system.ksdwrt(2,'PLOG:'||pCTX.LSID||':'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||' user: '||PLUSER||' level: '||getLevelInText(pLLEVEL)||' logid: '||pID ||' '||pLSECTION); 
+         sys.dbms_system.ksdwrt(2,substr(LLTEXTE,0,1000));
+         if (length(LLTEXTE) >= 1000) then 
+             sys.dbms_system.ksdwrt(2,substr(LLTEXTE,1000));
+@@ -298,7 +313,7 @@ BEGIN
+     END IF;
+ 
+     IF pCTX.USE_TRACE = TRUE then        
+-        sys.dbms_system.ksdwrt(1,'PLOG:'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||' user: '||PLUSER||' level: '||getLevelInText(pLLEVEL)||' logid: '||pID ||' '||pLSECTION); 
++        sys.dbms_system.ksdwrt(1,'PLOG:'||pCTX.LSID||':'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||' user: '||PLUSER||' level: '||getLevelInText(pLLEVEL)||' logid: '||pID ||' '||pLSECTION); 
+         sys.dbms_system.ksdwrt(1,substr(LLTEXTE,0,1000));
+         if (length(LLTEXTE) >= 1000) then 
+             sys.dbms_system.ksdwrt(1,substr(LLTEXTE,1000));
+diff --git a/sql/plog.sql b/sql/plog.sql
+index ef5a9f6..c85d666 100644
+--- a/sql/plog.sql
++++ b/sql/plog.sql
+@@ -6,7 +6,7 @@
+  * distribution in the LICENSE.txt file.  
+  * see: <http://log4plsql.sourceforge.net>  */
+ 
+-@@plogparam.sql 
++@@plogparam.sql
+ @@pslog.sql
+ @@pblog.sql
+ 
+diff --git a/sql/plogparam.sql b/sql/plogparam.sql
+index 8fa1ec1..41148c9 100644
+--- a/sql/plogparam.sql
++++ b/sql/plogparam.sql
+@@ -6,8 +6,8 @@
+  * distribution in the LICENSE.txt file.  
+  * see: <http://log4plsql.sourceforge.net>  */
+ 
+-@@pslogparam.sql 
+-@@pblogparam.sql 
++@@pslogparam.sql
++@@pblogparam.sql
+ 
+ 
+ 
+diff --git a/sql/tlog.sql b/sql/tlog.sql
+index d9bce1d..f5f9ac8 100644
+--- a/sql/tlog.sql
++++ b/sql/tlog.sql
+@@ -25,9 +25,12 @@
+ CREATE TABLE TLOG
+ (
+  ID         number,
++ LSID       number,
+  LDate      DATE default sysdate,
+  LHSECS     number,
+  LLEVEL     number,
++ LMODULE    varchar2(2000),
++ LACTION    varchar2(2000),
+  LSECTION   varchar2(2000),
+  LTEXTE     varchar2(2000),
+  LUSER      VARCHAR2(30),
+diff --git a/sql/vlog.sql b/sql/vlog.sql
+index c86f5ad..532a67c 100644
+--- a/sql/vlog.sql
++++ b/sql/vlog.sql
+@@ -27,7 +27,8 @@
+ create or replace  view VLOG as 
+ select '['||to_char(LDATE, 'Mon DD, HH24:MI:SS')||':'||LTRIM(to_char(mod(LHSECS,100),'09'))||']'||
+        '['||plog.getLevelInText(llevel)||']['||
+-       LUSER||']['||
++       LUSER||':'||LSID||']['||
++       NVL(LMODULE,'-')||'.'||NVL(LACTION,'-')||']['||
+        LSECTION||']['||
+        LTEXTE||']' log
+ from (select * from (select * from tlog order by id desc) where rownum < 25)
