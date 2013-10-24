@@ -1,0 +1,152 @@
+--
+-- Install log4plsql package
+--
+
+set verify off
+set define on
+set echo off
+set serveroutput on size 2000
+
+-- Local variables
+--
+undefine l_cur_schema l_cur_user
+-- Current schema
+col l_schema new_value l_cur_schema heading 'Current schema' format a32
+-- Current database user
+col l_user new_value l_cur_user heading 'Current user' format a32
+--
+-- Instance number
+variable l_instno     number;
+
+
+prompt I: Start installation
+
+whenever sqlerror exit sql.sqlcode;
+
+--
+-- Load ORADBA schema variables
+@@confdir@/schema-define
+
+--
+-- Load packages variable
+@@confdir@/@PACKAGE_NAME@-define
+
+-- Get instance number
+begin
+  select instance_number into :l_instno from sys.v_$instance;
+end;
+/
+
+-- Get current schema
+select 'I:' "I:",
+       sys_context( 'userenv', 'current_user' ) l_user,
+       sys_context( 'userenv', 'current_schema' ) l_schema
+  from dual;
+
+prompt I: Granting system rights ...
+@@grantsys &&ORA_SCHEMA_OWNER
+
+--
+-- Set new schema owner
+alter session set current_schema=&&ORA_SCHEMA_OWNER;
+
+prompt I: Creating package PMDC ...
+@@pmdc.sql
+prompt I: Creating tables ...
+@@tlog.sql
+@@tlogLevel.sql
+prompt I: Creating sequence ...
+@@slog.sql
+prompt I: Creating package PLOG ...
+@@plog.sql
+prompt I: Creating views ...
+@@vlog.sql
+prompt I: Creating cleaner procedure ...
+@@create_proc.sql
+
+prompt I: Creating synonyms ...
+@@grant_synonym.sql
+
+alter session set current_schema = &&l_cur_schema;
+
+
+--
+-- Create clean job
+--
+grant execute on "&&ORA_SCHEMA_OWNER".log4plsql_clean to &&ORADBA_ROLE_CLEANER;
+grant execute on "&&ORA_SCHEMA_OWNER".log4plsql_clean to &&ORA_SCHEMA_CLEANER;
+
+--
+-- SUDO into ORADBA_SCHEMA_CLEANER
+--
+-- Current schema owners' password
+variable l_passwd     varchar2(45);
+-- Current account state
+variable l_acc        varchar2(45);
+-- Additional privileges
+variable l_gr_session number;
+variable l_gr_proc    number;
+--
+begin
+    select password, account_status into :l_passwd, :l_acc
+      from sys.dba_users
+     where username = upper('&&ORA_SCHEMA_CLEANER');
+end;
+/
+--
+begin
+  select 1 into :l_gr_session
+    from dba_sys_privs
+   where grantee = '&&ORA_SCHEMA_CLEANER' and privilege = 'CREATE SESSION';
+exception
+  when NO_DATA_FOUND then :l_gr_session := 0;
+end;
+/
+--
+begin
+  select 1 into :l_gr_proc
+    from dba_sys_privs
+   where grantee = '&&ORA_SCHEMA_CLEANER' and privilege = 'CREATE PROCEDURE';
+exception
+  when NO_DATA_FOUND then :l_gr_proc := 0;
+end;
+/
+--
+-- Unlock target account
+grant create session to "&&ORA_SCHEMA_CLEANER";
+grant create procedure to "&&ORA_SCHEMA_CLEANER";
+alter user "&&ORA_SCHEMA_CLEANER" identified by "he110" account unlock;
+--
+-- Connect to target account
+connect &&ORA_SCHEMA_CLEANER/he110
+show user
+
+--
+-- Recreate clean job
+@@drop_job
+@@create_job
+
+--
+-- Restore target account
+--
+connect / as sysdba
+show user
+--
+whenever sqlerror continue
+--
+alter user "&&ORA_SCHEMA_CLEANER" identified by values ':l_passwd';
+--
+begin
+    if :l_acc <> 'OPEN' then
+        execute immediate 'alter user "&&ORA_SCHEMA_CLEANER" account lock';
+    end if;
+    if :l_gr_session = 0 then
+        execute immediate 'revoke create session from "&&ORA_SCHEMA_CLEANER"';
+    end if;
+    if :l_gr_proc = 0 then
+       execute immediate 'revoke create procedure from "&&ORA_SCHEMA_CLEANER"';
+    end if;
+end;
+/
+
+prompt "I: Finish installation"

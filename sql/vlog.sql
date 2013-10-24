@@ -35,7 +35,9 @@ from (select * from (select * from tlog order by id desc) where rownum < 25)
 order by ID
 /
 
-
+create or replace  view ORADBA_VLOG as
+select (select dbid from v$database) dbid, t.* from tlog t
+/
 
 
 -------------------------------------------------------------------
