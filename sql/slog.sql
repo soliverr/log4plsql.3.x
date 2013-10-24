@@ -20,11 +20,33 @@
  * distribution in the LICENSE.txt file.  
  * see: <http://log4plsql.sourceforge.net>  */
 
-CREATE SEQUENCE SLOG INCREMENT BY 1 START WITH 1  MAXVALUE 1.0E28 CYCLE 
+define L_SEQ_NAME = SLOG
+
+-- Create sequence, if it not exists
+declare
+  l$cnt integer := 0;
+  l$sql varchar2(1024) := '
+CREATE SEQUENCE &&L_SEQ_NAME
+    INCREMENT BY 1
+    START WITH 1
+    MAXVALUE 1.0E28
+    CYCLE';
+begin
+  select count(1) into l$cnt
+    from sys.all_sequences
+   where sequence_name = '&&L_SEQ_NAME'
+     and sequence_owner = upper('&&ORA_SCHEMA_OWNER');
+
+   if l$cnt = 0 then
+     begin
+       execute immediate l$sql;
+       dbms_output.put_line('I: Sequence &&L_SEQ_NAME created' );
+     end;
+   else
+       dbms_output.put_line('W: Sequence &&L_SEQ_NAME already exists' );
+   end if;
+end;
 /
-
-
-
 
 -------------------------------------------------------------------
 -- End of document
