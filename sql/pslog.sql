@@ -126,18 +126,19 @@ MES_CODE_DBMS_PIPE CONSTANT VARCHAR2(100) := 'error DBMS_PIPE.send_message. retu
 -- Public declaration of package
 -------------------------------------------------------------------
 TYPE LOG_CTX IS RECORD (                     -- Context de log
-    isDefaultInit     BOOLEAN default FALSE ,     
-    LLEVEL            TLOG.LLEVEL%type      ,     
+    isDefaultInit     BOOLEAN default FALSE ,
+    LSID              TLOG.LSID%type        ,
+    LLEVEL            TLOG.LLEVEL%type      ,
     LSECTION          TLOG.LSECTION%type    ,
-    LTEXTE            TLOG.LTEXTE%type      ,              
+    LTEXTE            TLOG.LTEXTE%type      ,
     USE_LOG4J         BOOLEAN               ,
     USE_OUT_TRANS     BOOLEAN               ,
     USE_LOGTABLE      BOOLEAN               ,
     USE_ALERT         BOOLEAN               ,
-    USE_TRACE         BOOLEAN               ,    
-    USE_DBMS_OUTPUT   BOOLEAN               ,     
-    INIT_LSECTION     TLOG.LSECTION%type    ,    
-    INIT_LLEVEL       TLOG.LLEVEL%type      ,   
+    USE_TRACE         BOOLEAN               ,
+    USE_DBMS_OUTPUT   BOOLEAN               ,
+    INIT_LSECTION     TLOG.LSECTION%type    ,
+    INIT_LLEVEL       TLOG.LLEVEL%type      ,
     DBMS_PIPE_NAME    VARCHAR2(255)         ,
 	DBMS_OUTPUT_WRAP  PLS_INTEGER          
 );
@@ -271,7 +272,12 @@ FUNCTION init
 )
 RETURN LOG_CTX;
 
-
+-- Set default context
+--  from init
+procedure setDefaultContext
+(
+    pCTX        IN OUT NOCOPY LOG_CTX                             -- Context
+);
 
 /**
 <B>Sections management</B> : init a new section
@@ -330,6 +336,12 @@ PROCEDURE setLevel
     pCTX          IN OUT NOCOPY LOG_CTX                      ,  -- Context
     pLEVEL        IN TLOGLEVEL.LCODE%type                       -- Higher level to allot dynamically
 );
+
+PROCEDURE setLevel
+(
+    pLEVEL        IN TLOG.LLEVEL%type default NOLEVEL           -- Higher level to allot dynamically
+);
+
 
 /**
 <B>Levels Management</B> : Get a current level
