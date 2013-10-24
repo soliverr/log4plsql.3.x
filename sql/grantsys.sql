@@ -23,12 +23,12 @@
  * see: <http://log4plsql.sourceforge.net>  */
 
 
-SPO GRANTSYS.LOG
+--SPO GRANTSYS.LOG
 
-CREATE USER &&1  PROFILE "DEFAULT" 
-    IDENTIFIED BY &&1
-/
-    
+--CREATE USER &&1  PROFILE "DEFAULT" 
+--    IDENTIFIED BY &&1
+--/
+
 GRANT CONNECT TO &&1
 /
 
