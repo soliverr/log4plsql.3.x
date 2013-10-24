@@ -144,6 +144,7 @@ END;
 procedure addRow
 (
   pID         in TLOG.id%type,
+  pSID        in TLOG.lsid%type,
   pLDate      in TLOG.ldate%type,
   pLHSECS     in TLOG.lhsecs%type, 
   pLLEVEL     in TLOG.llevel%type,
@@ -152,21 +153,30 @@ procedure addRow
   pLTEXTE     in TLOG.ltexte%type
 )
 is
+    pMNAME varchar2(2000);
+    pANAME varchar2(2000);
 begin
+	DBMS_APPLICATION_INFO.READ_MODULE ( pMNAME, pANAME );
         insert into TLOG
             (
              ID         ,
+	         LSID       ,
              LDate      ,
              LHSECS     , 
              LLEVEL     ,
+	         LMODULE    ,
+	         LACTION    ,
              LSECTION   ,
              LUSER      ,
              LTEXTE     
              ) VALUES (
              pID,
+	         pSID,
              pLDate,
              pLHSECS,
              pLLEVEL,
+	         pMNAME,
+	         pANAME,
              pLSECTION,
              pLUSER,
              pLTEXTE
@@ -177,6 +187,7 @@ end;
 procedure addRowAutonomous
 (
   pID         in TLOG.id%type,
+  pSID        in TLOG.lsid%type,
   pLDate      in TLOG.ldate%type,
   pLHSECS     in TLOG.lhsecs%type, 
   pLLEVEL     in TLOG.llevel%type,
@@ -190,6 +201,7 @@ begin
  addRow
   (
    pID         => pID,
+   pSID        => pSID,
    pLDate      => pLDate,
    pLHSECS     => pLHSECS, 
    pLLEVEL     => pLLEVEL,
@@ -249,6 +261,7 @@ BEGIN
                  addRow
                   (
                    pID         => pID,
+		           pSID        => pCTX.LSID,
                    pLDate      => pLDate,
                    pLHSECS     => pLHSECS, 
                    pLLEVEL     => pLLEVEL,
@@ -260,6 +273,7 @@ BEGIN
                  addRowAutonomous
                   (
                    pID         => pID,
+		           pSID        => pCTX.LSID,
                    pLDate      => pLDate,
                    pLHSECS     => pLHSECS, 
                    pLLEVEL     => pLLEVEL,
@@ -272,6 +286,7 @@ BEGIN
 
     IF pCTX.USE_LOG4J = TRUE then
         DBMS_PIPE.pack_message(pID);                    -- SEQUENTIAL ID
+	    DBMS_PIPE.pack_message(pCTX.LSID);              -- SESSION ID
         DBMS_PIPE.pack_message(pLDATE);                 -- TIMESTAMP OF LOG STATEMENT
 		DBMS_PIPE.pack_message(MOD(pLHSECS,100));       -- HUNDREDTHS OF SECONDS FOR TIMESTAMP
         DBMS_PIPE.pack_message(pLLEVEL);                -- LOG LEVEL
@@ -290,7 +305,7 @@ BEGIN
     END IF;
              
     IF pCTX.USE_ALERT = TRUE then        
-        sys.dbms_system.ksdwrt(2,'PLOG:'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||' user: '||PLUSER||' level: '||getLevelInText(pLLEVEL)||' logid: '||pID ||' '||pLSECTION); 
+        sys.dbms_system.ksdwrt(2,'PLOG:'||pCTX.LSID||':'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||' user: '||PLUSER||' level: '||getLevelInText(pLLEVEL)||' logid: '||pID ||' '||pLSECTION); 
         sys.dbms_system.ksdwrt(2,substr(LLTEXTE,0,1000));
         if (length(LLTEXTE) >= 1000) then 
             sys.dbms_system.ksdwrt(2,substr(LLTEXTE,1000));
@@ -298,7 +313,7 @@ BEGIN
     END IF;
 
     IF pCTX.USE_TRACE = TRUE then        
-        sys.dbms_system.ksdwrt(1,'PLOG:'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||' user: '||PLUSER||' level: '||getLevelInText(pLLEVEL)||' logid: '||pID ||' '||pLSECTION); 
+        sys.dbms_system.ksdwrt(1,'PLOG:'||pCTX.LSID||':'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||' user: '||PLUSER||' level: '||getLevelInText(pLLEVEL)||' logid: '||pID ||' '||pLSECTION); 
         sys.dbms_system.ksdwrt(1,substr(LLTEXTE,0,1000));
         if (length(LLTEXTE) >= 1000) then 
             sys.dbms_system.ksdwrt(1,substr(LLTEXTE,1000));

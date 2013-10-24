@@ -25,9 +25,12 @@
 CREATE TABLE TLOG
 (
  ID         number,
+ LSID       number,
  LDate      DATE default sysdate,
  LHSECS     number,
  LLEVEL     number,
+ LMODULE    varchar2(2000),
+ LACTION    varchar2(2000),
  LSECTION   varchar2(2000),
  LTEXTE     varchar2(2000),
  LUSER      VARCHAR2(30),

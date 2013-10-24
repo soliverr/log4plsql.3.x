@@ -6,7 +6,7 @@
  * distribution in the LICENSE.txt file.  
  * see: <http://log4plsql.sourceforge.net>  */
 
-@@plogparam.sql 
+@@plogparam.sql
 @@pslog.sql
 @@pblog.sql
 
