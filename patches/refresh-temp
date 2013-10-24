@@ -1,0 +1,293 @@
+Bottom: 56f239f20e8f0c5afeb6c468d35bf4101cab393c
+Top:    4319de11c8a32e1eda77692a87a50a2c95874074
+Author: sOliverr <soliverr@gmail.com>
+Date:   2013-10-24 11:05:24 +0600
+
+Refresh of oradba_infrastructure
+
+---
+
+diff --git a/sql/grant_synonym.sql b/sql/grant_synonym.sql
+index c05e9c6..0052115 100644
+--- a/sql/grant_synonym.sql
++++ b/sql/grant_synonym.sql
+@@ -24,10 +24,10 @@
+ GRANT EXECUTE ON PLOG TO PUBLIC
+ /
+ 
+-DROP PUBLIC SYNONYM PLOG
+-/
++--DROP PUBLIC SYNONYM PLOG
++--/
+ 
+-CREATE  PUBLIC SYNONYM PLOG
++CREATE OR REPLACE PUBLIC SYNONYM PLOG
+     FOR PLOG
+ /
+ 
+@@ -36,10 +36,10 @@ CREATE  PUBLIC SYNONYM PLOG
+ grant select on tlog to public
+ /
+ 
+-DROP PUBLIC SYNONYM tlog
+-/
++--DROP PUBLIC SYNONYM tlog
++--/
+ 
+-CREATE  PUBLIC SYNONYM tlog
++CREATE OR REPLACE PUBLIC SYNONYM tlog
+     FOR tlog
+ /
+ 
+@@ -47,13 +47,16 @@ CREATE  PUBLIC SYNONYM tlog
+ grant select on vlog to public
+ /
+ 
+-DROP PUBLIC SYNONYM vlog
+-/
++--DROP PUBLIC SYNONYM vlog
++--/
+ 
+-CREATE  PUBLIC SYNONYM vlog
++CREATE OR REPLACE PUBLIC SYNONYM vlog
+     FOR vlog
+ /
+ 
++CREATE OR REPLACE PUBLIC SYNONYM ORADBA_VLOG
++    FOR ORADBA_VLOG
++/
+ 
+ 
+ 
+diff --git a/sql/grantsys.sql b/sql/grantsys.sql
+index 8d969a3..e774648 100644
+--- a/sql/grantsys.sql
++++ b/sql/grantsys.sql
+@@ -23,12 +23,12 @@
+  * see: <http://log4plsql.sourceforge.net>  */
+ 
+ 
+-SPO GRANTSYS.LOG
++--SPO GRANTSYS.LOG
++
++--CREATE USER &&1  PROFILE "DEFAULT" 
++--    IDENTIFIED BY &&1
++--/
+ 
+-CREATE USER &&1  PROFILE "DEFAULT" 
+-    IDENTIFIED BY &&1
+-/
+-    
+ GRANT CONNECT TO &&1
+ /
+ 
+diff --git a/sql/slog.sql b/sql/slog.sql
+index 3a856d1..41bb776 100644
+--- a/sql/slog.sql
++++ b/sql/slog.sql
+@@ -20,11 +20,33 @@
+  * distribution in the LICENSE.txt file.  
+  * see: <http://log4plsql.sourceforge.net>  */
+ 
+-CREATE SEQUENCE SLOG INCREMENT BY 1 START WITH 1  MAXVALUE 1.0E28 CYCLE 
+-/
+-
++define L_SEQ_NAME = SLOG
+ 
++-- Create sequence, if it not exists
++declare
++  l$cnt integer := 0;
++  l$sql varchar2(1024) := '
++CREATE SEQUENCE &&L_SEQ_NAME
++    INCREMENT BY 1
++    START WITH 1
++    MAXVALUE 1.0E28
++    CYCLE';
++begin
++  select count(1) into l$cnt
++    from sys.all_sequences
++   where sequence_name = '&&L_SEQ_NAME'
++     and sequence_owner = upper('&&ORA_SCHEMA_OWNER');
+ 
++   if l$cnt = 0 then
++     begin
++       execute immediate l$sql;
++       dbms_output.put_line('I: Sequence &&L_SEQ_NAME created' );
++     end;
++   else
++       dbms_output.put_line('W: Sequence &&L_SEQ_NAME already exists' );
++   end if;
++end;
++/
+ 
+ -------------------------------------------------------------------
+ -- End of document
+diff --git a/sql/tlog.sql b/sql/tlog.sql
+index f5f9ac8..c878e51 100644
+--- a/sql/tlog.sql
++++ b/sql/tlog.sql
+@@ -21,9 +21,14 @@
+  * distribution in the LICENSE.txt file.  
+  * see: <http://log4plsql.sourceforge.net>  */
+ 
++define L_TABLE_NAME = TLOG
+ 
+-CREATE TABLE TLOG
+-(
++-- Create table if it not exists
++declare
++  l$cnt integer := 0;
++
++  l$sql varchar2(1024) := '
++CREATE TABLE &&L_TABLE_NAME  (
+  ID         number,
+  LSID       number,
+  LDate      DATE default sysdate,
+@@ -35,9 +40,30 @@ CREATE TABLE TLOG
+  LTEXTE     varchar2(2000),
+  LUSER      VARCHAR2(30),
+  CONSTRAINT pk_TLOG PRIMARY KEY (id)
+-)
++)';
++
++begin
++  select count(1) into l$cnt
++    from sys.all_tables
++   where table_name = '&&L_TABLE_NAME'
++     and owner = upper('&&ORA_SCHEMA_OWNER');
++
++   if l$cnt = 0 then
++     begin
++       execute immediate l$sql || ' tablespace &&ORA_TBSP_TBLS';
++       dbms_output.put_line('I: Table &&L_TABLE_NAME created' );
++     end;
++    else
++       dbms_output.put_line('W: Table &&L_TABLE_NAME already exists' );
++   end if;
++end;
+ /
+ 
++comment on table "&&L_TABLE_NAME" is
++'Table to logging messages';
++
++undefine L_TABLE_NAME
++
+ -------------------------------------------------------------------
+ -- End of document
+ -------------------------------------------------------------------
+diff --git a/sql/tlogLevel.sql b/sql/tlogLevel.sql
+index 71641d3..603ec7f 100644
+--- a/sql/tlogLevel.sql
++++ b/sql/tlogLevel.sql
+@@ -20,40 +20,78 @@
+  * distribution in the LICENSE.txt file.  
+  * see: <http://log4plsql.sourceforge.net>  */
+ 
++define L_TABLE_NAME = TLOGLEVEL
+ 
+-CREATE TABLE TLOGLEVEL
+-(
++-- Create table if it not exists
++declare
++  l$cnt integer := 0;
++
++  l$sql varchar2(1024) := '
++CREATE TABLE &&L_TABLE_NAME  (
+  LLEVEL       number (4,0),
+  LSYSLOGEQUIV number (4,0),
+  LCODE        varchar2(10),
+  LDESC        varchar2(255),
+  CONSTRAINT pk_TLOGLEVEL PRIMARY KEY (LLEVEL)
+-)
++)';
++
++begin
++  select count(1) into l$cnt
++    from sys.all_tables
++   where table_name = '&&L_TABLE_NAME'
++     and owner = upper('&&ORA_SCHEMA_OWNER');
++
++   if l$cnt = 0 then
++     begin
++       execute immediate l$sql || ' tablespace &&ORA_TBSP_TBLS';
++       dbms_output.put_line('I: Table &&L_TABLE_NAME created' );
++     end;
++    else
++       dbms_output.put_line('W: Table &&L_TABLE_NAME already exists' );
++   end if;
++end;
+ /
+ 
+-insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
+-(10,'OFF', 'The OFF has the highest possible rank and is intended to turn off logging.');
++comment on table "&&L_TABLE_NAME" is
++'Message levels';
++
++-- Load initial rows if table is empty
++declare
++  l$cnt integer := 0;
++begin
++  select count(1) into l$cnt from &&L_TABLE_NAME;
+ 
+-insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
+-(20,'FATAL', 'The FATAL level designates very severe error events that will presumably lead the application to abort.');
++  if l$cnt = 0 then
++    insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
++    (10,'OFF', 'The OFF has the highest possible rank and is intended to turn off logging.');
+ 
+-insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
+-(30,'ERROR', 'the ERROR level designates error events that might still allow the application  to continue running.');
++    insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
++    (20,'FATAL', 'The FATAL level designates very severe error events that will presumably lead the application to abort.');
+ 
+-insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
+-(40,'WARN', 'The WARN level designates potentially harmful situations.');
++    insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
++    (30,'ERROR', 'the ERROR level designates error events that might still allow the application  to continue running.');
+ 
+-insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
+-(50,'INFO', 'The INFO level designates informational messages that highlight the progress of the application at coarse-grained level.');
++    insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
++    (40,'WARN', 'The WARN level designates potentially harmful situations.');
+ 
+-insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
+-(60,'DEBUG', 'The DEBUG Level designates fine-grained informational events that are most useful to debug an application.');
++    insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
++    (50,'INFO', 'The INFO level designates informational messages that highlight the progress of the application at coarse-grained level.');
+ 
+-insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
+-(70,'ALL', 'The ALL has the lowest possible rank and is intended to turn on all logging.');
++    insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
++    (60,'DEBUG', 'The DEBUG Level designates fine-grained informational events that are most useful to debug an application.');
+ 
++    insert into TLOGLEVEL (LLEVEL, LCODE, LDESC) Values 
++    (70,'ALL', 'The ALL has the lowest possible rank and is intended to turn on all logging.');
++
++    commit;
++
++    select count(1) into l$cnt from &&L_TABLE_NAME;
++    dbms_output.put_line('I: ' || l$cnt || ' rows sucessfully loaded');
++  end if;
++end;
++/
+ 
+-commit;
++undefine L_TABLE_NAME
+ 
+ -------------------------------------------------------------------
+ -- End of document
+diff --git a/sql/vlog.sql b/sql/vlog.sql
+index 532a67c..53465d4 100644
+--- a/sql/vlog.sql
++++ b/sql/vlog.sql
+@@ -35,7 +35,9 @@ from (select * from (select * from tlog order by id desc) where rownum < 25)
+ order by ID
+ /
+ 
+-
++create or replace  view ORADBA_VLOG as
++select (select dbid from v$database) dbid, t.* from tlog t
++/
+ 
+ 
+ -------------------------------------------------------------------
