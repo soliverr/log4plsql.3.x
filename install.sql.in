@@ -1,6 +1,10 @@
 --
 -- Install log4plsql package
 --
+--
+-- Comments written in French.
+-- To compile package set NLS_LANG to NLS_LANG=French.WE8ISO8859P1
+--
 
 set verify off
 set define on
@@ -66,6 +70,7 @@ prompt I: Creating cleaner procedure ...
 
 prompt I: Creating synonyms ...
 @@grant_synonym.sql
+
 
 alter session set current_schema = &&l_cur_schema;
 
