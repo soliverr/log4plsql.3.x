@@ -1,5 +1,5 @@
 Bottom: 56f239f20e8f0c5afeb6c468d35bf4101cab393c
-Top:    11bf111ba1c0f858d8412203e41944b4239e30fb
+Top:    9ed607afeb8b860092c13867aaf16a8da8dc9c04
 Author: sOliverr <soliverr@gmail.com>
 Date:   2013-10-24 11:00:07 +0600
 
@@ -361,17 +361,16 @@ index 0000000..6d16973
 +
 diff --git a/build_expand.sh.in b/build_expand.sh.in
 new file mode 100644
-index 0000000..5a577ff
+index 0000000..2adbd9d
 --- /dev/null
 +++ b/build_expand.sh.in
-@@ -0,0 +1,73 @@
+@@ -0,0 +1,72 @@
 +#! /bin/bash
 +#
-+# Разименовать переменные, создаваемые скриптом configure, в заданных файлах
-+# $Id$
++# Expand configure variables in given files
 +#
 +
-+# Файлы для обработки ------------------------------------------------------------------
++# Files to proceed ---------------------------------------------------------------------
 +if [ $# -gt 0 ] ; then
 +    files="$@"
 +else
@@ -3916,12 +3915,16 @@ index 0000000..f233f10
 +undefine L_VIEW_NAME
 diff --git a/install.sql.in b/install.sql.in
 new file mode 100644
-index 0000000..69f398c
+index 0000000..e8e9e95
 --- /dev/null
 +++ b/install.sql.in
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,157 @@
 +--
 +-- Install log4plsql package
++--
++--
++-- Comments written in French.
++-- To compile package set NLS_LANG to NLS_LANG=French.WE8ISO8859P1
 +--
 +
 +set verify off
@@ -3988,6 +3991,7 @@ index 0000000..69f398c
 +
 +prompt I: Creating synonyms ...
 +@@grant_synonym.sql
++
 +
 +alter session set current_schema = &&l_cur_schema;
 +
