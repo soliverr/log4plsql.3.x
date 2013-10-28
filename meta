@@ -1,11 +1,10 @@
 Version: 1
-Previous: 5fc5c6ef1a49456434154b032ed0cc5d35ab458c
-Head: 569e54f53d6c15dce43fb37ab9ef7e23385dd70f
+Previous: b180c346db5ef367e3826e2ab6ff9abfcf933b9a
+Head: ed377bcca0683173917de8ab0eb67d045aa4b37c
 Applied:
   default_context: 00f88323d9190995fa5689db31835fa11f5b688c
   additional_columns: 3c826e1dbba55e8be137d93fd5b174d9f71a7384
-  added-spaces-before-param-line: f16842d47db60fb03e176469e5fa829ec32831b4
-  refresh-temp: 569e54f53d6c15dce43fb37ab9ef7e23385dd70f
+  added-spaces-before-param-line: ed377bcca0683173917de8ab0eb67d045aa4b37c
 Unapplied:
   oradba_infrastructure: 4ce78118957ad32e3c32388030ad5fad6fddb2f1
 Hidden:
