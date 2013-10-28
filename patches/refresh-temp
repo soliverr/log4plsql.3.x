@@ -1,0 +1,47 @@
+Bottom: 11bf111ba1c0f858d8412203e41944b4239e30fb
+Top:    9ed607afeb8b860092c13867aaf16a8da8dc9c04
+Author: sOliverr <soliverr@gmail.com>
+Date:   2013-10-28 10:27:00 +0600
+
+Refresh of oradba_infrastructure
+
+---
+
+diff --git a/build_expand.sh.in b/build_expand.sh.in
+index 5a577ff..2adbd9d 100644
+--- a/build_expand.sh.in
++++ b/build_expand.sh.in
+@@ -1,10 +1,9 @@
+ #! /bin/bash
+ #
+-# Разименовать переменные, создаваемые скриптом configure, в заданных файлах
+-# $Id$
++# Expand configure variables in given files
+ #
+ 
+-# Файлы для обработки ------------------------------------------------------------------
++# Files to proceed ---------------------------------------------------------------------
+ if [ $# -gt 0 ] ; then
+     files="$@"
+ else
+diff --git a/install.sql.in b/install.sql.in
+index 69f398c..e8e9e95 100644
+--- a/install.sql.in
++++ b/install.sql.in
+@@ -1,6 +1,10 @@
+ --
+ -- Install log4plsql package
+ --
++--
++-- Comments written in French.
++-- To compile package set NLS_LANG to NLS_LANG=French.WE8ISO8859P1
++--
+ 
+ set verify off
+ set define on
+@@ -67,6 +71,7 @@ prompt I: Creating cleaner procedure ...
+ prompt I: Creating synonyms ...
+ @@grant_synonym.sql
+ 
++
+ alter session set current_schema = &&l_cur_schema;
