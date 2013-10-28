@@ -247,15 +247,15 @@ PROCEDURE log
 
 /**
 context initialisation 
-@param pSECTION         default = NULL                            => PLSQL CALL STACK
-@param pLEVEL           default = PLOGPARAM.DEFAULT_LEVEL         -> LDEBUG
-@param pLOG4J           default = PLOGPARAM.DEFAULT_USE_LOG4J     -> FALSE (If true backgroun process is require)
-@param pLOGTABLE        default = PLOGPARAM.DEFAULT_LOG_TABLE     -> TRUE
-@param pOUT_TRANS       default = PLOGPARAM.DEFAULT_LOG_OUT_TRANS -> TRUE
-@param pALERT           default = PLOGPARAM.DEFAULT_LOG_ALERT     -> FALSE
-@param pTRACE           default = PLOGPARAM.DEFAULT_LOG_TRACE     -> FALSE
-@param pDBMS_OUTPUT     default = PLOGPARAM.DEFAULT_DBMS_OUTPUT   -> FALSE 
-@return new context LOG_CTX
+* @param pSECTION         default = NULL                            => PLSQL CALL STACK
+* @param pLEVEL           default = PLOGPARAM.DEFAULT_LEVEL         -> LDEBUG
+* @param pLOG4J           default = PLOGPARAM.DEFAULT_USE_LOG4J     -> FALSE (If true backgroun process is require)
+* @param pLOGTABLE        default = PLOGPARAM.DEFAULT_LOG_TABLE     -> TRUE
+* @param pOUT_TRANS       default = PLOGPARAM.DEFAULT_LOG_OUT_TRANS -> TRUE
+* @param pALERT           default = PLOGPARAM.DEFAULT_LOG_ALERT     -> FALSE
+* @param pTRACE           default = PLOGPARAM.DEFAULT_LOG_TRACE     -> FALSE
+* @param pDBMS_OUTPUT     default = PLOGPARAM.DEFAULT_DBMS_OUTPUT   -> FALSE 
+* @return new context LOG_CTX
 */
 FUNCTION init
 (
@@ -290,7 +290,7 @@ PROCEDURE setBeginSection
 
 /**
 <B>Sections management</B> : get a current section
-@return  current section
+* @return  current section
 */
 FUNCTION getSection
 (
@@ -299,7 +299,7 @@ FUNCTION getSection
 RETURN TLOG.LSECTION%type;
 /**
 <B>Sections management</B> : get a default section
-@return  current section
+* @return  current section
 */
 FUNCTION getSection
 RETURN TLOG.LSECTION%type;
@@ -629,13 +629,13 @@ RETURN boolean;
 
 /**
 <B>assert</B> log a messge is pCondition is FALSE if pRaiseExceptionIfFALSE = TRUE the message is raise<BR/> 
-@param     pCTX                     IN OUT NOCOPY LOG_CTX        -> Context
-@param     pCONDITION               IN BOOLEAN                   -> error condition 
-@param     pLogErrorMessageIfFALSE  IN VARCHAR2 default 'assert condition error' -> message if pCondition is true 
-@param     pLogErrorCodeIfFALSE     IN NUMBER  default -20000    -> error code is pCondition is true range -20000 .. -20999  
-@param     pRaiseExceptionIfFALSE   IN BOOLEAN default FALSE     -> if true raise pException_in if pCondition is true 
-@param     pLogErrorReplaceError    IN BOOLEAN default FALSE     -> TRUE, the error is placed on the stack of previous errors. If FALSE (the default), the error replaces all previous errors (see Oracle Documentation RAISE_APPLICATION_ERROR)
-@return log a messge if pCondition is FALSE. If pRaiseExceptionIfFALSE = TRUE the message is raise
+* @param     pCTX                     IN OUT NOCOPY LOG_CTX        -> Context
+* @param     pCONDITION               IN BOOLEAN                   -> error condition 
+* @param     pLogErrorMessageIfFALSE  IN VARCHAR2 default 'assert condition error' -> message if pCondition is true 
+* @param     pLogErrorCodeIfFALSE     IN NUMBER  default -20000    -> error code is pCondition is true range -20000 .. -20999  
+* @param     pRaiseExceptionIfFALSE   IN BOOLEAN default FALSE     -> if true raise pException_in if pCondition is true 
+* @param     pLogErrorReplaceError    IN BOOLEAN default FALSE     -> TRUE, the error is placed on the stack of previous errors. If FALSE (the default), the error replaces all previous errors (see Oracle Documentation RAISE_APPLICATION_ERROR)
+* @return log a messge if pCondition is FALSE. If pRaiseExceptionIfFALSE = TRUE the message is raise
 */
 PROCEDURE assert (
     pCONDITION               IN BOOLEAN                                   , -- error condition 
@@ -648,13 +648,13 @@ PROCEDURE assert (
 );
 /**
 <B>assert</B> log a messge is pCondition is FALSE if pRaiseExceptionIfFALSE = TRUE the message is raise<BR/> 
-@param     pCTX                     IN OUT NOCOPY LOG_CTX        -> Context
-@param     pCONDITION               IN BOOLEAN                   -> error condition 
-@param     pLogErrorMessageIfFALSE  IN VARCHAR2 default 'assert condition error' -> message if pCondition is true 
-@param     pLogErrorCodeIfFALSE     IN NUMBER  default -20000    -> error code is pCondition is true range -20000 .. -20999  
-@param     pRaiseExceptionIfFALSE   IN BOOLEAN default FALSE     -> if true raise pException_in if pCondition is true 
-@param     pLogErrorReplaceError    IN BOOLEAN default FALSE     -> TRUE, the error is placed on the stack of previous errors. If FALSE (the default), the error replaces all previous errors (see Oracle Documentation RAISE_APPLICATION_ERROR)
-@return log a messge if pCondition is FALSE. If pRaiseExceptionIfFALSE = TRUE the message is raise
+* @param     pCTX                     IN OUT NOCOPY LOG_CTX        -> Context
+* @param     pCONDITION               IN BOOLEAN                   -> error condition 
+* @param     pLogErrorMessageIfFALSE  IN VARCHAR2 default 'assert condition error' -> message if pCondition is true 
+* @param     pLogErrorCodeIfFALSE     IN NUMBER  default -20000    -> error code is pCondition is true range -20000 .. -20999  
+* @param     pRaiseExceptionIfFALSE   IN BOOLEAN default FALSE     -> if true raise pException_in if pCondition is true 
+* @param     pLogErrorReplaceError    IN BOOLEAN default FALSE     -> TRUE, the error is placed on the stack of previous errors. If FALSE (the default), the error replaces all previous errors (see Oracle Documentation RAISE_APPLICATION_ERROR)
+* @return log a messge if pCondition is FALSE. If pRaiseExceptionIfFALSE = TRUE the message is raise
 
 */
 PROCEDURE assert (
