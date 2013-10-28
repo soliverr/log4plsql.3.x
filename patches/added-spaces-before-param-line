@@ -3,7 +3,7 @@ Top:    56f239f20e8f0c5afeb6c468d35bf4101cab393c
 Author: sOliverr <soliverr@gmail.com>
 Date:   2013-10-28 10:34:03 +0600
 
-Added spaces before '@param' line
+Added comment sign before '@param' and '@return' lines
 
 
 ---
